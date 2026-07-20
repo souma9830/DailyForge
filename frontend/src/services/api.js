@@ -1,186 +1,92 @@
-const API_BASE = '/api';
+import axios from 'axios';
 
-export async function fetchStats() {
-  try {
-    const res = await fetch(`${API_BASE}/stats`);
-    if (!res.ok) throw new Error('Failed to fetch stats');
-    return await res.json();
-  } catch (err) {
-    console.error('API Error (fetchStats):', err);
-    throw err;
-  }
-}
+const API_BASE_URL = 'http://localhost:5000/api';
 
-export async function fetchHabits() {
-  try {
-    const res = await fetch(`${API_BASE}/habits`);
-    if (!res.ok) throw new Error('Failed to fetch habits');
-    return await res.json();
-  } catch (err) {
-    console.error('API Error (fetchHabits):', err);
-    throw err;
-  }
-}
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
-export async function createHabit(habitData) {
-  try {
-    const res = await fetch(`${API_BASE}/habits`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(habitData),
-    });
-    if (!res.ok) throw new Error('Failed to create habit');
-    return await res.json();
-  } catch (err) {
-    console.error('API Error (createHabit):', err);
-    throw err;
-  }
-}
+// Stats API
+export const fetchStats = async () => {
+  return await api.get('/stats');
+};
 
-export async function toggleHabit(id, dateStr) {
-  try {
-    const res = await fetch(`${API_BASE}/habits/${id}/toggle`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: dateStr }),
-    });
-    if (!res.ok) throw new Error('Failed to toggle habit date');
-    return await res.json();
-  } catch (err) {
-    console.error('API Error (toggleHabit):', err);
-    throw err;
-  }
-}
+// Habits API
+export const fetchHabits = async () => {
+  return await api.get('/habits');
+};
 
-export async function deleteHabit(id) {
-  try {
-    const res = await fetch(`${API_BASE}/habits/${id}`, {
-      method: 'DELETE',
-    });
-    if (!res.ok) throw new Error('Failed to delete habit');
-    return await res.json();
-  } catch (err) {
-    console.error('API Error (deleteHabit):', err);
-    throw err;
-  }
-}
+export const createHabit = async (habitData) => {
+  return await api.post('/habits', habitData);
+};
 
-export async function fetchTasks(filters = {}) {
-  try {
-    const params = new URLSearchParams(filters).toString();
-    const res = await fetch(`${API_BASE}/tasks?${params}`);
-    if (!res.ok) throw new Error('Failed to fetch tasks');
-    return await res.json();
-  } catch (err) {
-    console.error('API Error (fetchTasks):', err);
-    throw err;
-  }
-}
+export const toggleHabit = async (id, dateStr) => {
+  return await api.put(`/habits/${id}/toggle`, { dateStr });
+};
 
-export async function createTask(taskData) {
-  try {
-    const res = await fetch(`${API_BASE}/tasks`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(taskData),
-    });
-    if (!res.ok) throw new Error('Failed to create task');
-    return await res.json();
-  } catch (err) {
-    console.error('API Error (createTask):', err);
-    throw err;
-  }
-}
+export const deleteHabit = async (id) => {
+  return await api.delete(`/habits/${id}`);
+};
 
-export async function updateTask(id, updates) {
-  try {
-    const res = await fetch(`${API_BASE}/tasks/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates),
-    });
-    if (!res.ok) throw new Error('Failed to update task');
-    return await res.json();
-  } catch (err) {
-    console.error('API Error (updateTask):', err);
-    throw err;
-  }
-}
+// Tasks API
+export const fetchTasks = async () => {
+  return await api.get('/tasks');
+};
 
-export async function deleteTask(id) {
-  try {
-    const res = await fetch(`${API_BASE}/tasks/${id}`, {
-      method: 'DELETE',
-    });
-    if (!res.ok) throw new Error('Failed to delete task');
-    return await res.json();
-  } catch (err) {
-    console.error('API Error (deleteTask):', err);
-    throw err;
-  }
-}
+export const createTask = async (taskData) => {
+  return await api.post('/tasks', taskData);
+};
 
-export async function fetchJournals() {
-  try {
-    const res = await fetch(`${API_BASE}/journal`);
-    if (!res.ok) throw new Error('Failed to fetch journals');
-    return await res.json();
-  } catch (err) {
-    console.error('API Error (fetchJournals):', err);
-    throw err;
-  }
-}
+export const updateTask = async (id, updates) => {
+  return await api.put(`/tasks/${id}`, updates);
+};
 
-export async function saveJournal(journalData) {
-  try {
-    const res = await fetch(`${API_BASE}/journal`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(journalData),
-    });
-    if (!res.ok) throw new Error('Failed to save journal');
-    return await res.json();
-  } catch (err) {
-    console.error('API Error (saveJournal):', err);
-    throw err;
-  }
-}
+export const deleteTask = async (id) => {
+  return await api.delete(`/tasks/${id}`);
+};
 
-export async function fetchStudySessions() {
-  try {
-    const res = await fetch(`${API_BASE}/study`);
-    if (!res.ok) throw new Error('Failed to fetch study sessions');
-    return await res.json();
-  } catch (err) {
-    console.error('API Error (fetchStudySessions):', err);
-    throw err;
-  }
-}
+// Reflection Journal API
+export const fetchJournal = async () => {
+  return await api.get('/journal');
+};
 
-export async function createStudySession(sessionData) {
-  try {
-    const res = await fetch(`${API_BASE}/study`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(sessionData),
-    });
-    if (!res.ok) throw new Error('Failed to create study session');
-    return await res.json();
-  } catch (err) {
-    console.error('API Error (createStudySession):', err);
-    throw err;
-  }
-}
+export const fetchJournals = fetchJournal; // Alias for compatibility
 
-export async function deleteStudySession(id) {
-  try {
-    const res = await fetch(`${API_BASE}/study/${id}`, {
-      method: 'DELETE',
-    });
-    if (!res.ok) throw new Error('Failed to delete study session');
-    return await res.json();
-  } catch (err) {
-    console.error('API Error (deleteStudySession):', err);
-    throw err;
-  }
-}
+export const saveJournal = async (journalData) => {
+  return await api.post('/journal', journalData);
+};
+
+// Study Sessions API
+export const fetchStudySessions = async () => {
+  return await api.get('/study');
+};
+
+export const createStudySession = async (sessionData) => {
+  return await api.post('/study', sessionData);
+};
+
+export const deleteStudySession = async (id) => {
+  return await api.delete(`/study/${id}`);
+};
+
+// Goals API
+export const fetchGoals = async () => {
+  return await api.get('/goals');
+};
+
+export const createGoal = async (goalData) => {
+  return await api.post('/goals', goalData);
+};
+
+export const updateGoal = async (id, updates) => {
+  return await api.put(`/goals/${id}`, updates);
+};
+
+export const deleteGoal = async (id) => {
+  return await api.delete(`/goals/${id}`);
+};
+
+export default api;

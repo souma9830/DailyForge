@@ -6,12 +6,15 @@ import HabitTracker from './components/HabitTracker';
 import TaskBoard from './components/TaskBoard';
 import StudyLogger from './components/StudyLogger';
 import CalendarView from './components/CalendarView';
+import GoalsView from './components/GoalsView';
 import ReflectionJournal from './components/ReflectionJournal';
 import ProductivityAnalytics from './components/ProductivityAnalytics';
 import SettingsView from './components/SettingsView';
+
 import NewHabitModal from './components/Modals/NewHabitModal';
 import NewTaskModal from './components/Modals/NewTaskModal';
 import LogStudyModal from './components/Modals/LogStudyModal';
+import NewGoalModal from './components/Modals/NewGoalModal';
 
 import {
   fetchStats,
@@ -26,6 +29,10 @@ import {
   fetchStudySessions,
   createStudySession,
   deleteStudySession,
+  fetchGoals,
+  createGoal,
+  updateGoal,
+  deleteGoal,
 } from './services/api';
 
 export default function App() {
@@ -34,12 +41,14 @@ export default function App() {
   const [habits, setHabits] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [studySessions, setStudySessions] = useState([]);
+  const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Modals state
   const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isStudyModalOpen, setIsStudyModalOpen] = useState(false);
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
 
   useEffect(() => {
     loadAllData();
@@ -48,17 +57,19 @@ export default function App() {
   const loadAllData = async () => {
     setLoading(true);
     try {
-      const [statsRes, habitsRes, tasksRes, studyRes] = await Promise.all([
+      const [statsRes, habitsRes, tasksRes, studyRes, goalsRes] = await Promise.all([
         fetchStats().catch(() => null),
         fetchHabits().catch(() => ({ data: [] })),
         fetchTasks().catch(() => ({ data: [] })),
         fetchStudySessions().catch(() => ({ data: [] })),
+        fetchGoals().catch(() => ({ data: [] })),
       ]);
 
       if (statsRes?.data) setStats(statsRes.data);
       if (habitsRes?.data) setHabits(habitsRes.data);
       if (tasksRes?.data) setTasks(tasksRes.data);
       if (studyRes?.data) setStudySessions(studyRes.data);
+      if (goalsRes?.data) setGoals(goalsRes.data);
     } catch (error) {
       console.error('Data load error:', error);
     } finally {
@@ -141,6 +152,34 @@ export default function App() {
     }
   };
 
+  // Goal Handlers
+  const handleCreateGoal = async (goalData) => {
+    try {
+      await createGoal(goalData);
+      loadAllData();
+    } catch (err) {
+      console.error('Error creating goal:', err);
+    }
+  };
+
+  const handleUpdateGoal = async (id, updates) => {
+    try {
+      await updateGoal(id, updates);
+      loadAllData();
+    } catch (err) {
+      console.error('Error updating goal:', err);
+    }
+  };
+
+  const handleDeleteGoal = async (id) => {
+    try {
+      await deleteGoal(id);
+      loadAllData();
+    } catch (err) {
+      console.error('Error deleting goal:', err);
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-[#0a0d14] text-slate-100 font-sans selection:bg-blue-600 selection:text-white">
       {/* Sidebar Navigation */}
@@ -203,6 +242,16 @@ export default function App() {
             />
           )}
 
+          {activeTab === 'goals' && (
+            <GoalsView
+              goals={goals}
+              onCreateGoal={handleCreateGoal}
+              onUpdateGoal={handleUpdateGoal}
+              onDeleteGoal={handleDeleteGoal}
+              onOpenNewGoal={() => setIsGoalModalOpen(true)}
+            />
+          )}
+
           {activeTab === 'journal' && <ReflectionJournal />}
 
           {activeTab === 'analytics' && (
@@ -228,6 +277,11 @@ export default function App() {
         isOpen={isStudyModalOpen}
         onClose={() => setIsStudyModalOpen(false)}
         onCreate={handleCreateStudySession}
+      />
+      <NewGoalModal
+        isOpen={isGoalModalOpen}
+        onClose={() => setIsGoalModalOpen(false)}
+        onCreate={handleCreateGoal}
       />
     </div>
   );
