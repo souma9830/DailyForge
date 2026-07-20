@@ -24,6 +24,7 @@ export default function Dashboard({
   onOpenNewHabit, 
   onOpenNewTask, 
   onOpenLogStudy,
+  onOpenExport,
   setActiveTab 
 }) {
   const summary = stats?.summary || {};
@@ -193,26 +194,34 @@ export default function Dashboard({
         className="glass-panel p-6 rounded-3xl border border-[#1e2638] space-y-4"
       >
         <h3 className="font-bold text-sm text-slate-300 uppercase tracking-wider">Quick Action Command Bar</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {/* Action 1: Log Study Session */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          {/* Action 1: Export Excel */}
+          <button
+            onClick={onOpenExport}
+            className="flex items-center justify-center gap-2 px-3 py-3 rounded-2xl bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition-all shadow-sm group hover:-translate-y-0.5"
+          >
+            <span>📊 Export Excel</span>
+          </button>
+
+          {/* Action 2: Log Study Session */}
           <button
             onClick={onOpenLogStudy}
             className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl bg-cyan-600/15 hover:bg-cyan-600/25 text-cyan-300 border border-cyan-500/30 text-xs font-bold transition-all shadow-sm group hover:-translate-y-0.5"
           >
             <BookOpen className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform" />
-            <span>+ Log Study Session</span>
+            <span>+ Log Study</span>
           </button>
 
-          {/* Action 2: Add Task */}
+          {/* Action 3: Add Task */}
           <button
             onClick={onOpenNewTask}
             className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-md shadow-blue-600/20 hover:-translate-y-0.5"
           >
             <Plus className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
-            <span>+ Add New Task</span>
+            <span>+ Add Task</span>
           </button>
 
-          {/* Action 3: Habit Check-In */}
+          {/* Action 4: Habit Check-In */}
           <button
             onClick={onOpenNewHabit}
             className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-bold transition-all shadow-sm group hover:-translate-y-0.5"
@@ -221,13 +230,13 @@ export default function Dashboard({
             <span>+ New Habit</span>
           </button>
 
-          {/* Action 4: Reflection Journal */}
+          {/* Action 5: Reflection Journal */}
           <button
             onClick={() => setActiveTab('journal')}
             className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl bg-purple-600/15 hover:bg-purple-600/25 text-purple-300 border border-purple-500/30 text-xs font-bold transition-all shadow-sm group hover:-translate-y-0.5"
           >
             <Sparkles className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
-            <span>Daily Reflection</span>
+            <span>Reflection</span>
           </button>
         </div>
       </motion.div>

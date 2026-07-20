@@ -12,6 +12,7 @@
   "dependencies": {
     "autoprefixer": "^10.4.19",
     "clsx": "^2.1.1",
+    "exceljs": "^4.4.0",
     "framer-motion": "^11.2.10",
     "lucide-react": "^0.383.0",
     "postcss": "^8.4.38",

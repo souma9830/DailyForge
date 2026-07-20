@@ -18,6 +18,7 @@ import NewTaskModal from './components/Modals/NewTaskModal';
 import LogStudyModal from './components/Modals/LogStudyModal';
 import NewGoalModal from './components/Modals/NewGoalModal';
 import NewReminderModal from './components/Modals/NewReminderModal';
+import ExportDataModal from './components/ExportDataModal';
 
 import {
   fetchStats,
@@ -58,6 +59,7 @@ export default function App() {
   const [isStudyModalOpen, setIsStudyModalOpen] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   useEffect(() => {
     loadAllData();
@@ -252,6 +254,7 @@ export default function App() {
         <Navbar
           onOpenNewHabit={() => setIsHabitModalOpen(true)}
           onOpenNewTask={() => setIsTaskModalOpen(true)}
+          onOpenExport={() => setIsExportModalOpen(true)}
           isMongoConnected={stats?.isMongoDBConnected}
         />
 
@@ -266,6 +269,7 @@ export default function App() {
               onOpenNewHabit={() => setIsHabitModalOpen(true)}
               onOpenNewTask={() => setIsTaskModalOpen(true)}
               onOpenLogStudy={() => setIsStudyModalOpen(true)}
+              onOpenExport={() => setIsExportModalOpen(true)}
               setActiveTab={setActiveTab}
             />
           )}
@@ -368,6 +372,13 @@ export default function App() {
         isOpen={isReminderModalOpen}
         onClose={() => setIsReminderModalOpen(false)}
         onCreate={handleCreateReminder}
+      />
+      <ExportDataModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        studySessions={studySessions}
+        tasks={tasks}
+        habits={habits}
       />
     </div>
   );
