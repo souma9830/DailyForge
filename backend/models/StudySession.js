@@ -37,4 +37,8 @@ const studySessionSchema = new mongoose.Schema(
   }
 );
 
+// Performance compound indexes for date range and subject queries
+studySessionSchema.index({ date: -1, subject: 1 });
+studySessionSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('StudySession', studySessionSchema);

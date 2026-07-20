@@ -14,4 +14,15 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    chunkSizeWarningLimit: 1200,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          excel: ['exceljs'],
+          charts: ['recharts'],
+        },
+      },
+    },
+  },
 });

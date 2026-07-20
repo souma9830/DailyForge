@@ -13,8 +13,8 @@ import {
 } from 'lucide-react';
 import { fetchSettings, updateSettings } from '../services/api';
 
-export default function SettingsView({ stats, onReload }) {
-  const [username, setUsername] = useState('Master Explorer');
+export default function SettingsView({ stats, onReload, onUsernameChange }) {
+  const [username, setUsername] = useState('');
   const [dailyStudyGoal, setDailyStudyGoal] = useState(6);
   const [notificationTime, setNotificationTime] = useState('20:00');
   const [theme, setTheme] = useState('dark');
@@ -53,6 +53,7 @@ export default function SettingsView({ stats, onReload }) {
 
       setToast('Settings successfully saved to MongoDB!');
       setTimeout(() => setToast(null), 4000);
+      if (onUsernameChange) onUsernameChange(username);
       if (onReload) onReload();
     } catch (err) {
       console.error('Error saving settings:', err);
@@ -100,7 +101,7 @@ export default function SettingsView({ stats, onReload }) {
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="e.g. Master Explorer"
+              placeholder="e.g. Soumadeep"
               className="w-full bg-[#0d121d] border border-[#1e2638] rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 max-w-md"
             />
             <p className="text-[11px] text-slate-400 mt-1">Displayed in greetings, achievement badges, and reports.</p>

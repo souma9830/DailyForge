@@ -25,29 +25,32 @@ export default function Dashboard({
   onOpenNewTask, 
   onOpenLogStudy,
   onOpenExport,
-  setActiveTab 
+  setActiveTab,
+  username = 'Explorer',
 }) {
   const summary = stats?.summary || {};
   const todayStr = new Date().toISOString().split('T')[0];
 
-  // Calculate today's study hours
-  const todayStudySessions = studySessions.filter(s => s.date === todayStr || s.createdAt?.startsWith(todayStr));
+  // Real today's study from live sessions
+  const todayStudySessions = studySessions.filter(s => s.date === todayStr);
   const totalStudyMinutes = todayStudySessions.reduce((acc, curr) => acc + (Number(curr.durationMinutes) || 0), 0);
   const studyHoursToday = (totalStudyMinutes / 60).toFixed(1);
 
-  // Target study goal (e.g. 6.0 hours daily target)
-  const targetStudyHours = 6.0;
+  // Daily study target comes from stats (set in Settings), default 6h
+  const targetStudyHours = summary.dailyStudyGoal || 6;
   const studyProgressPercent = Math.min(Math.round((studyHoursToday / targetStudyHours) * 100), 100);
 
-  // Tasks completed today / total
+  // Real task counts from MongoDB via stats
   const tasksCompletedCount = summary.tasksCompleted || 0;
   const tasksTotalCount = summary.tasksTotal || 0;
   const taskProgressPercent = summary.taskCompletionRate || 0;
 
-  // Habit streak summary
-  const activeStreak = habits.length ? Math.max(...habits.map(h => h.currentStreak || 0)) : 5;
+  // Real streak: highest currentStreak across all real habits (0 if no habits yet)
+  const activeStreak = habits.length > 0
+    ? Math.max(...habits.map(h => h.currentStreak || 0))
+    : 0;
 
-  // Overall combined Daily Goal Progress percentage
+  // Combined daily progress
   const combinedGoalPercent = Math.round((studyProgressPercent * 0.5) + (taskProgressPercent * 0.5));
 
   // Framer Motion Animation Variants
@@ -82,10 +85,13 @@ export default function Dashboard({
             <Sparkles className="w-3.5 h-3.5 text-blue-400" /> Daily Mastery Active
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
-            Welcome back, <span className="forge-gradient-text">Master Explorer</span> 👋
+            Welcome back, <span className="forge-gradient-text">{username}</span> 👋
           </h1>
           <p className="text-slate-300 text-sm leading-relaxed max-w-2xl">
-            You are on a <span className="font-bold text-amber-400">{activeStreak}-day streak</span>! Track your study hours, complete daily tasks, and forge high-performance habits today.
+            {activeStreak > 0
+              ? <><span className="font-bold text-amber-400">{activeStreak}-day streak</span> — keep the momentum going! Track study hours, crush daily tasks, and forge winning habits.</>
+              : <>Start your first habit or log a study session to begin your streak. Every champion starts at day&nbsp;0 — today is your day!</>
+            }
           </p>
         </div>
         {/* Glow Effects */}
@@ -109,9 +115,13 @@ export default function Dashboard({
           </div>
           <div className="mt-4 flex items-baseline gap-2">
             <span className="text-3xl font-black text-white">{activeStreak}</span>
-            <span className="text-sm font-bold text-amber-400">Days Active 🔥</span>
+            <span className="text-sm font-bold text-amber-400">
+              {activeStreak === 0 ? 'No streak yet' : `Day${activeStreak === 1 ? '' : 's'} 🔥`}
+            </span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-2 font-medium">Consecutive daily consistency</p>
+          <p className="text-[11px] text-slate-400 mt-2 font-medium">
+            {activeStreak === 0 ? 'Complete a habit to start your streak' : 'Consecutive daily consistency'}
+          </p>
         </motion.div>
 
         {/* Today's Study Hours */}

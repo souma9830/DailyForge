@@ -11,11 +11,11 @@ import {
   Sparkles,
   BarChart3,
   Settings,
-  ShieldAlert,
   Zap,
+  X,
 } from 'lucide-react';
 
-export default function Sidebar({ activeTab, setActiveTab, stats }) {
+export default function Sidebar({ activeTab, setActiveTab, stats, isOpenMobile, setIsOpenMobile }) {
   const navItems = [
     { id: 'dashboard', label: 'Forge Dashboard', icon: LayoutDashboard },
     { id: 'habits', label: 'Habit Forge', icon: Flame },
@@ -30,38 +30,57 @@ export default function Sidebar({ activeTab, setActiveTab, stats }) {
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
-  return (
-    <aside className="w-64 bg-[#0d111a] border-r border-[#1e2638] flex flex-col justify-between hidden md:flex min-h-screen p-4 select-none">
+  const handleSelect = (id) => {
+    setActiveTab(id);
+    if (setIsOpenMobile) setIsOpenMobile(false);
+  };
+
+  const sidebarContent = (
+    <div className="w-64 bg-[#0d111a] border-r border-[#1e2638] flex flex-col justify-between h-full p-4 select-none">
       <div className="space-y-6">
         {/* Brand Header */}
-        <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/20">
-            <Zap className="w-5 h-5 text-white stroke-[2.5]" />
+        <div className="flex items-center justify-between px-2 py-2">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <Zap className="w-5 h-5 text-white stroke-[2.5]" />
+            </div>
+            <div>
+              <h1 className="font-black text-lg tracking-wider text-white">
+                DAILY<span className="forge-gradient-text">FORGE</span>
+              </h1>
+              <p className="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">
+                Productivity Engine
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="font-black text-lg tracking-wider text-white">
-              DAILY<span className="forge-gradient-text">FORGE</span>
-            </h1>
-            <p className="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">
-              Productivity Engine
-            </p>
-          </div>
+
+          {/* Close Mobile Drawer Button */}
+          {setIsOpenMobile && (
+            <button
+              onClick={() => setIsOpenMobile(false)}
+              className="md:hidden text-slate-400 hover:text-white p-1 rounded-lg hover:bg-[#1a2234]"
+              aria-label="Close Mobile Navigation"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         {/* Navigation Items */}
-        <nav className="space-y-1.5">
+        <nav className="space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => handleSelect(item.id)}
                 className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs transition-all duration-200 ${
                   isActive
                     ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25 font-bold'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-[#151c2c]'
                 }`}
+                aria-current={isActive ? 'page' : undefined}
               >
                 <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                 <span>{item.label}</span>
@@ -87,6 +106,24 @@ export default function Sidebar({ activeTab, setActiveTab, stats }) {
           Daily Forge Mastery Active
         </p>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop Fixed Sidebar */}
+      <aside className="hidden md:block min-h-screen sticky top-0 h-screen">{sidebarContent}</aside>
+
+      {/* Mobile Backdrop & Slide-out Drawer */}
+      {isOpenMobile && (
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          <div
+            className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm"
+            onClick={() => setIsOpenMobile(false)}
+          />
+          <div className="relative z-10 w-64 h-full">{sidebarContent}</div>
+        </div>
+      )}
+    </>
   );
 }

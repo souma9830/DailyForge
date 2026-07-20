@@ -45,4 +45,8 @@ const taskSchema = new mongoose.Schema(
   }
 );
 
+// Performance compound indexes for fast query execution
+taskSchema.index({ status: 1, category: 1 });
+taskSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('Task', taskSchema);

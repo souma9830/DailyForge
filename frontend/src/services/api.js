@@ -1,118 +1,97 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { 'Content-Type': 'application/json' },
+  timeout: 15000,
 });
 
-// Stats API
-export const fetchStats = async () => {
-  return await api.get('/stats');
-};
+// ─── Request Interceptor ─────────────────────────────────────────────────────
+api.interceptors.request.use(
+  (config) => config,
+  (error) => Promise.reject(error)
+);
 
-// Habits API
-export const fetchHabits = async () => {
-  return await api.get('/habits');
-};
+// ─── Response Interceptor ─────────────────────────────────────────────────────
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const message =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Network error – check your connection';
 
-export const createHabit = async (habitData) => {
-  return await api.post('/habits', habitData);
-};
+    // Dispatch a custom event so the UI can catch & toast it
+    window.dispatchEvent(
+      new CustomEvent('dailyforge:apierror', { detail: { message } })
+    );
 
-export const toggleHabit = async (id, dateStr) => {
-  return await api.put(`/habits/${id}/toggle`, { dateStr });
-};
+    return Promise.reject(error);
+  }
+);
 
-export const deleteHabit = async (id) => {
-  return await api.delete(`/habits/${id}`);
-};
+// ─── Stats ───────────────────────────────────────────────────────────────────
+export const fetchStats = () => api.get('/stats');
 
-// Tasks API
-export const fetchTasks = async () => {
-  return await api.get('/tasks');
-};
+// ─── Habits ──────────────────────────────────────────────────────────────────
+export const fetchHabits = () => api.get('/habits');
 
-export const createTask = async (taskData) => {
-  return await api.post('/tasks', taskData);
-};
+export const createHabit = (data) => api.post('/habits', data);
 
-export const updateTask = async (id, updates) => {
-  return await api.put(`/tasks/${id}`, updates);
-};
+export const toggleHabit = (id, dateStr) =>
+  api.put(`/habits/${id}/toggle`, { date: dateStr });
 
-export const deleteTask = async (id) => {
-  return await api.delete(`/tasks/${id}`);
-};
+export const deleteHabit = (id) => api.delete(`/habits/${id}`);
 
-// Reflection Journal API
-export const fetchJournal = async () => {
-  return await api.get('/journal');
-};
+// ─── Tasks ───────────────────────────────────────────────────────────────────
+export const fetchTasks = () => api.get('/tasks');
 
-export const fetchJournals = fetchJournal; // Alias for compatibility
+export const createTask = (data) => api.post('/tasks', data);
 
-export const saveJournal = async (journalData) => {
-  return await api.post('/journal', journalData);
-};
+export const updateTask = (id, updates) => api.put(`/tasks/${id}`, updates);
 
-// Study Sessions API
-export const fetchStudySessions = async () => {
-  return await api.get('/study');
-};
+export const deleteTask = (id) => api.delete(`/tasks/${id}`);
 
-export const createStudySession = async (sessionData) => {
-  return await api.post('/study', sessionData);
-};
+// ─── Journal ─────────────────────────────────────────────────────────────────
+export const fetchJournal = () => api.get('/journal');
+export const fetchJournals = fetchJournal; // alias
 
-export const deleteStudySession = async (id) => {
-  return await api.delete(`/study/${id}`);
-};
+export const fetchJournalByDate = (date) => api.get(`/journal/${date}`);
 
-// Goals API
-export const fetchGoals = async () => {
-  return await api.get('/goals');
-};
+export const saveJournal = (data) => api.post('/journal', data);
 
-export const createGoal = async (goalData) => {
-  return await api.post('/goals', goalData);
-};
+// ─── Study Sessions ───────────────────────────────────────────────────────────
+export const fetchStudySessions = () => api.get('/study');
 
-export const updateGoal = async (id, updates) => {
-  return await api.put(`/goals/${id}`, updates);
-};
+export const createStudySession = (data) => api.post('/study', data);
 
-export const deleteGoal = async (id) => {
-  return await api.delete(`/goals/${id}`);
-};
+export const deleteStudySession = (id) => api.delete(`/study/${id}`);
 
-// Reminders API
-export const fetchReminders = async () => {
-  return await api.get('/reminders');
-};
+// ─── Goals ───────────────────────────────────────────────────────────────────
+export const fetchGoals = () => api.get('/goals');
 
-export const createReminder = async (reminderData) => {
-  return await api.post('/reminders', reminderData);
-};
+export const createGoal = (data) => api.post('/goals', data);
 
-export const toggleReminder = async (id) => {
-  return await api.put(`/reminders/${id}/toggle`);
-};
+export const updateGoal = (id, updates) => api.put(`/goals/${id}`, updates);
 
-export const deleteReminder = async (id) => {
-  return await api.delete(`/reminders/${id}`);
-};
+export const deleteGoal = (id) => api.delete(`/goals/${id}`);
 
-// Settings API
-export const fetchSettings = async () => {
-  return await api.get('/settings');
-};
+// ─── Reminders ────────────────────────────────────────────────────────────────
+export const fetchReminders = () => api.get('/reminders');
 
-export const updateSettings = async (settingsData) => {
-  return await api.put('/settings', settingsData);
-};
+export const createReminder = (data) => api.post('/reminders', data);
+
+export const toggleReminder = (id) =>
+  api.put(`/reminders/${id}/toggle`);
+
+export const deleteReminder = (id) => api.delete(`/reminders/${id}`);
+
+// ─── Settings ─────────────────────────────────────────────────────────────────
+export const fetchSettings = () => api.get('/settings');
+
+export const updateSettings = (data) => api.put('/settings', data);
 
 export default api;
