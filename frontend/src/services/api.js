@@ -89,4 +89,21 @@ export const deleteGoal = async (id) => {
   return await api.delete(`/goals/${id}`);
 };
 
+// Reminders API
+export const fetchReminders = async () => {
+  return await api.get('/reminders');
+};
+
+export const createReminder = async (reminderData) => {
+  return await api.post('/reminders', reminderData);
+};
+
+export const toggleReminder = async (id) => {
+  return await api.put(`/reminders/${id}/toggle`);
+};
+
+export const deleteReminder = async (id) => {
+  return await api.delete(`/reminders/${id}`);
+};
+
 export default api;

@@ -22,6 +22,7 @@ app.use('/api/journal', require('./routes/journalRoutes'));
 app.use('/api/stats', require('./routes/statsRoutes'));
 app.use('/api/study', require('./routes/studyRoutes'));
 app.use('/api/goals', require('./routes/goalRoutes'));
+app.use('/api/reminders', require('./routes/reminderRoutes'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

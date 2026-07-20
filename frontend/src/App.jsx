@@ -7,6 +7,7 @@ import TaskBoard from './components/TaskBoard';
 import StudyLogger from './components/StudyLogger';
 import CalendarView from './components/CalendarView';
 import GoalsView from './components/GoalsView';
+import RemindersView from './components/RemindersView';
 import ReflectionJournal from './components/ReflectionJournal';
 import ProductivityAnalytics from './components/ProductivityAnalytics';
 import SettingsView from './components/SettingsView';
@@ -15,6 +16,7 @@ import NewHabitModal from './components/Modals/NewHabitModal';
 import NewTaskModal from './components/Modals/NewTaskModal';
 import LogStudyModal from './components/Modals/LogStudyModal';
 import NewGoalModal from './components/Modals/NewGoalModal';
+import NewReminderModal from './components/Modals/NewReminderModal';
 
 import {
   fetchStats,
@@ -33,6 +35,10 @@ import {
   createGoal,
   updateGoal,
   deleteGoal,
+  fetchReminders,
+  createReminder,
+  toggleReminder,
+  deleteReminder,
 } from './services/api';
 
 export default function App() {
@@ -42,6 +48,7 @@ export default function App() {
   const [tasks, setTasks] = useState([]);
   const [studySessions, setStudySessions] = useState([]);
   const [goals, setGoals] = useState([]);
+  const [reminders, setReminders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Modals state
@@ -49,20 +56,45 @@ export default function App() {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isStudyModalOpen, setIsStudyModalOpen] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+  const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
 
   useEffect(() => {
     loadAllData();
   }, []);
 
+  // Global Scheduled Browser Notification Check (runs every 15 seconds)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (typeof window === 'undefined' || !('Notification' in window)) return;
+      if (Notification.permission !== 'granted') return;
+
+      const now = new Date();
+      const currentHHMM = now.toTimeString().slice(0, 5); // "HH:mm"
+
+      reminders.forEach((rem) => {
+        if (rem.isActive && rem.time === currentHHMM) {
+          // Trigger browser notification
+          new Notification(`🔔 DailyForge Reminder: ${rem.title}`, {
+            body: `Scheduled alert for ${rem.category} at ${rem.time}`,
+            icon: '/favicon.ico',
+          });
+        }
+      });
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [reminders]);
+
   const loadAllData = async () => {
     setLoading(true);
     try {
-      const [statsRes, habitsRes, tasksRes, studyRes, goalsRes] = await Promise.all([
+      const [statsRes, habitsRes, tasksRes, studyRes, goalsRes, remRes] = await Promise.all([
         fetchStats().catch(() => null),
         fetchHabits().catch(() => ({ data: [] })),
         fetchTasks().catch(() => ({ data: [] })),
         fetchStudySessions().catch(() => ({ data: [] })),
         fetchGoals().catch(() => ({ data: [] })),
+        fetchReminders().catch(() => ({ data: [] })),
       ]);
 
       if (statsRes?.data) setStats(statsRes.data);
@@ -70,6 +102,7 @@ export default function App() {
       if (tasksRes?.data) setTasks(tasksRes.data);
       if (studyRes?.data) setStudySessions(studyRes.data);
       if (goalsRes?.data) setGoals(goalsRes.data);
+      if (remRes?.data) setReminders(remRes.data);
     } catch (error) {
       console.error('Data load error:', error);
     } finally {
@@ -180,6 +213,34 @@ export default function App() {
     }
   };
 
+  // Reminder Handlers
+  const handleCreateReminder = async (reminderData) => {
+    try {
+      await createReminder(reminderData);
+      loadAllData();
+    } catch (err) {
+      console.error('Error creating reminder:', err);
+    }
+  };
+
+  const handleToggleReminder = async (id) => {
+    try {
+      await toggleReminder(id);
+      loadAllData();
+    } catch (err) {
+      console.error('Error toggling reminder:', err);
+    }
+  };
+
+  const handleDeleteReminder = async (id) => {
+    try {
+      await deleteReminder(id);
+      loadAllData();
+    } catch (err) {
+      console.error('Error deleting reminder:', err);
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-[#0a0d14] text-slate-100 font-sans selection:bg-blue-600 selection:text-white">
       {/* Sidebar Navigation */}
@@ -252,6 +313,16 @@ export default function App() {
             />
           )}
 
+          {activeTab === 'reminders' && (
+            <RemindersView
+              reminders={reminders}
+              onCreateReminder={handleCreateReminder}
+              onToggleReminder={handleToggleReminder}
+              onDeleteReminder={handleDeleteReminder}
+              onOpenNewReminder={() => setIsReminderModalOpen(true)}
+            />
+          )}
+
           {activeTab === 'journal' && <ReflectionJournal />}
 
           {activeTab === 'analytics' && (
@@ -282,6 +353,11 @@ export default function App() {
         isOpen={isGoalModalOpen}
         onClose={() => setIsGoalModalOpen(false)}
         onCreate={handleCreateGoal}
+      />
+      <NewReminderModal
+        isOpen={isReminderModalOpen}
+        onClose={() => setIsReminderModalOpen(false)}
+        onCreate={handleCreateReminder}
       />
     </div>
   );
