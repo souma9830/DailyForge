@@ -9,6 +9,7 @@ import ProductivityAnalytics from './components/ProductivityAnalytics';
 import SettingsView from './components/SettingsView';
 import NewHabitModal from './components/Modals/NewHabitModal';
 import NewTaskModal from './components/Modals/NewTaskModal';
+import LogStudyModal from './components/Modals/LogStudyModal';
 
 import {
   fetchStats,
@@ -20,6 +21,8 @@ import {
   createTask,
   updateTask,
   deleteTask,
+  fetchStudySessions,
+  createStudySession,
 } from './services/api';
 
 export default function App() {
@@ -27,11 +30,13 @@ export default function App() {
   const [stats, setStats] = useState({});
   const [habits, setHabits] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [studySessions, setStudySessions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Modals state
   const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isStudyModalOpen, setIsStudyModalOpen] = useState(false);
 
   useEffect(() => {
     loadAllData();
@@ -40,15 +45,17 @@ export default function App() {
   const loadAllData = async () => {
     setLoading(true);
     try {
-      const [statsRes, habitsRes, tasksRes] = await Promise.all([
+      const [statsRes, habitsRes, tasksRes, studyRes] = await Promise.all([
         fetchStats().catch(() => null),
         fetchHabits().catch(() => ({ data: [] })),
         fetchTasks().catch(() => ({ data: [] })),
+        fetchStudySessions().catch(() => ({ data: [] })),
       ]);
 
       if (statsRes?.data) setStats(statsRes.data);
       if (habitsRes?.data) setHabits(habitsRes.data);
       if (tasksRes?.data) setTasks(tasksRes.data);
+      if (studyRes?.data) setStudySessions(studyRes.data);
     } catch (error) {
       console.error('Data load error:', error);
     } finally {
@@ -112,8 +119,18 @@ export default function App() {
     }
   };
 
+  // Study Session Handlers
+  const handleCreateStudySession = async (sessionData) => {
+    try {
+      await createStudySession(sessionData);
+      loadAllData();
+    } catch (err) {
+      console.error('Error creating study session:', err);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen bg-[#0a0d14] text-slate-100 font-sans">
+    <div className="flex min-h-screen bg-[#0a0d14] text-slate-100 font-sans selection:bg-blue-600 selection:text-white">
       {/* Sidebar Navigation */}
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} stats={stats?.summary} />
 
@@ -131,9 +148,11 @@ export default function App() {
               stats={stats}
               habits={habits}
               tasks={tasks}
+              studySessions={studySessions}
               onToggleHabit={handleToggleHabit}
               onOpenNewHabit={() => setIsHabitModalOpen(true)}
               onOpenNewTask={() => setIsTaskModalOpen(true)}
+              onOpenLogStudy={() => setIsStudyModalOpen(true)}
               setActiveTab={setActiveTab}
             />
           )}
@@ -176,6 +195,11 @@ export default function App() {
         isOpen={isTaskModalOpen}
         onClose={() => setIsTaskModalOpen(false)}
         onCreate={handleCreateTask}
+      />
+      <LogStudyModal
+        isOpen={isStudyModalOpen}
+        onClose={() => setIsStudyModalOpen(false)}
+        onCreate={handleCreateStudySession}
       />
     </div>
   );

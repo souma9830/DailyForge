@@ -145,3 +145,29 @@ export async function saveJournal(journalData) {
     throw err;
   }
 }
+
+export async function fetchStudySessions() {
+  try {
+    const res = await fetch(`${API_BASE}/study`);
+    if (!res.ok) throw new Error('Failed to fetch study sessions');
+    return await res.json();
+  } catch (err) {
+    console.error('API Error (fetchStudySessions):', err);
+    throw err;
+  }
+}
+
+export async function createStudySession(sessionData) {
+  try {
+    const res = await fetch(`${API_BASE}/study`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(sessionData),
+    });
+    if (!res.ok) throw new Error('Failed to create study session');
+    return await res.json();
+  } catch (err) {
+    console.error('API Error (createStudySession):', err);
+    throw err;
+  }
+}
