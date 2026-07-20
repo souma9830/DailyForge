@@ -171,3 +171,16 @@ export async function createStudySession(sessionData) {
     throw err;
   }
 }
+
+export async function deleteStudySession(id) {
+  try {
+    const res = await fetch(`${API_BASE}/study/${id}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) throw new Error('Failed to delete study session');
+    return await res.json();
+  } catch (err) {
+    console.error('API Error (deleteStudySession):', err);
+    throw err;
+  }
+}

@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard';
 import HabitTracker from './components/HabitTracker';
 import TaskBoard from './components/TaskBoard';
+import StudyLogger from './components/StudyLogger';
 import ReflectionJournal from './components/ReflectionJournal';
 import ProductivityAnalytics from './components/ProductivityAnalytics';
 import SettingsView from './components/SettingsView';
@@ -23,6 +24,7 @@ import {
   deleteTask,
   fetchStudySessions,
   createStudySession,
+  deleteStudySession,
 } from './services/api';
 
 export default function App() {
@@ -129,6 +131,15 @@ export default function App() {
     }
   };
 
+  const handleDeleteStudySession = async (id) => {
+    try {
+      await deleteStudySession(id);
+      loadAllData();
+    } catch (err) {
+      console.error('Error deleting study session:', err);
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-[#0a0d14] text-slate-100 font-sans selection:bg-blue-600 selection:text-white">
       {/* Sidebar Navigation */}
@@ -172,6 +183,14 @@ export default function App() {
               onUpdateTask={handleUpdateTask}
               onDeleteTask={handleDeleteTask}
               onOpenNewTask={() => setIsTaskModalOpen(true)}
+            />
+          )}
+
+          {activeTab === 'study' && (
+            <StudyLogger
+              studySessions={studySessions}
+              onCreateStudySession={handleCreateStudySession}
+              onDeleteStudySession={handleDeleteStudySession}
             />
           )}
 
