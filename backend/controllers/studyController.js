@@ -4,30 +4,43 @@ const { getIsConnected } = require('../config/db');
 let mockStudySessions = [
   {
     _id: 'session_1',
-    subject: 'Data Structures & Algorithms - Graph Traversal',
+    subject: 'Computer Science',
+    topic: 'Data Structures - Graph BFS & DFS Traversal',
     durationMinutes: 120,
-    category: 'CS Core',
-    notes: 'Implemented BFS & DFS algorithms in TypeScript with test cases',
+    difficulty: 'Hard',
+    notes: 'Implemented Graph adjacency list with cycle detection algorithms',
     date: new Date().toISOString().split('T')[0],
     createdAt: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
   },
   {
     _id: 'session_2',
-    subject: 'System Architecture & Microservices',
+    subject: 'Software Engineering',
+    topic: 'Distributed Systems & Consensus Protocols',
     durationMinutes: 90,
-    category: 'System Design',
-    notes: 'Studied event-driven messaging patterns with RabbitMQ & Kafka',
+    difficulty: 'Expert',
+    notes: 'Studied Raft consensus algorithm, leader election, and log replication',
     date: new Date().toISOString().split('T')[0],
     createdAt: new Date(Date.now() - 1000 * 60 * 360).toISOString(),
   },
   {
     _id: 'session_3',
-    subject: 'React 19 & Next.js App Router Deep Dive',
+    subject: 'Web Development',
+    topic: 'React 19 Server Components & Hooks',
     durationMinutes: 60,
-    category: 'Frontend',
-    notes: 'Reviewed server components, action state hooks, and streaming rendering',
+    difficulty: 'Medium',
+    notes: 'Learned useActionState, optimistic UI updates, and server actions',
     date: new Date(Date.now() - 86400000).toISOString().split('T')[0],
     createdAt: new Date(Date.now() - 86400000).toISOString(),
+  },
+  {
+    _id: 'session_4',
+    subject: 'Mathematics',
+    topic: 'Linear Algebra - Eigenvalues & Matrix Factorization',
+    durationMinutes: 75,
+    difficulty: 'Hard',
+    notes: 'Solved singular value decomposition problems and matrix transformations',
+    date: new Date(Date.now() - 86400000 * 2).toISOString().split('T')[0],
+    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
   },
 ];
 
@@ -35,7 +48,7 @@ let mockStudySessions = [
 exports.getStudySessions = async (req, res) => {
   try {
     if (getIsConnected()) {
-      const sessions = await StudySession.find().sort({ createdAt: -1 }).limit(20);
+      const sessions = await StudySession.find().sort({ date: -1, createdAt: -1 });
       return res.json({ success: true, count: sessions.length, data: sessions });
     }
     res.json({ success: true, count: mockStudySessions.length, data: mockStudySessions, mode: 'memory' });
@@ -47,14 +60,15 @@ exports.getStudySessions = async (req, res) => {
 // @route POST /api/study
 exports.createStudySession = async (req, res) => {
   try {
-    const { subject, durationMinutes, category, notes, date } = req.body;
+    const { subject, topic, durationMinutes, difficulty, notes, date } = req.body;
     const targetDate = date || new Date().toISOString().split('T')[0];
 
     if (getIsConnected()) {
       const session = await StudySession.create({
-        subject,
+        subject: subject || 'General Study',
+        topic: topic || 'General Topic',
         durationMinutes: Number(durationMinutes) || 30,
-        category: category || 'General',
+        difficulty: difficulty || 'Medium',
         notes: notes || '',
         date: targetDate,
       });
@@ -63,9 +77,10 @@ exports.createStudySession = async (req, res) => {
 
     const mockNew = {
       _id: 'session_' + Date.now(),
-      subject,
+      subject: subject || 'General Study',
+      topic: topic || 'General Topic',
       durationMinutes: Number(durationMinutes) || 30,
-      category: category || 'General',
+      difficulty: difficulty || 'Medium',
       notes: notes || '',
       date: targetDate,
       createdAt: new Date().toISOString(),
@@ -74,5 +89,21 @@ exports.createStudySession = async (req, res) => {
     res.status(201).json({ success: true, data: mockNew, mode: 'memory' });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+// @route DELETE /api/study/:id
+exports.deleteStudySession = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (getIsConnected()) {
+      await StudySession.findByIdAndDelete(id);
+      return res.json({ success: true, message: 'Study session deleted' });
+    }
+
+    mockStudySessions = mockStudySessions.filter((s) => s._id !== id);
+    res.json({ success: true, message: 'Study session deleted from memory' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };

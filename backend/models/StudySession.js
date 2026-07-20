@@ -4,7 +4,12 @@ const studySessionSchema = new mongoose.Schema(
   {
     subject: {
       type: String,
-      required: [true, 'Subject/Topic is required'],
+      required: [true, 'Subject is required'],
+      trim: true,
+    },
+    topic: {
+      type: String,
+      required: [true, 'Topic is required'],
       trim: true,
     },
     durationMinutes: {
@@ -12,16 +17,18 @@ const studySessionSchema = new mongoose.Schema(
       required: [true, 'Duration in minutes is required'],
       min: 1,
     },
-    category: {
+    difficulty: {
       type: String,
-      default: 'Engineering',
+      default: 'Medium',
+      enum: ['Easy', 'Medium', 'Hard', 'Expert'],
     },
     notes: {
       type: String,
       default: '',
+      trim: true,
     },
     date: {
-      type: String, // YYYY-MM-DD
+      type: String, // YYYY-MM-DD format
       default: () => new Date().toISOString().split('T')[0],
     },
   },
