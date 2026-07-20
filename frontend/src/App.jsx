@@ -206,7 +206,7 @@ export default function App() {
           {activeTab === 'journal' && <ReflectionJournal />}
 
           {activeTab === 'analytics' && (
-            <ProductivityAnalytics stats={stats} habits={habits} tasks={tasks} />
+            <ProductivityAnalytics stats={stats} habits={habits} tasks={tasks} studySessions={studySessions} />
           )}
 
           {activeTab === 'settings' && <SettingsView stats={stats} onReload={loadAllData} />}
