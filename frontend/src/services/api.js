@@ -89,6 +89,10 @@ export const toggleReminder = (id) =>
 
 export const deleteReminder = (id) => api.delete(`/reminders/${id}`);
 
+export const attendReminder = (id) => api.post(`/reminders/${id}/attend`);
+
+export const fetchReminderAnalytics = () => api.get('/reminders/analytics');
+
 // ─── Settings ─────────────────────────────────────────────────────────────────
 export const fetchSettings = () => api.get('/settings');
 

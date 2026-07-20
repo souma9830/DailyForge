@@ -4,7 +4,7 @@ const settingsSchema = new mongoose.Schema(
   {
     username: {
       type: String,
-      default: 'Master Explorer',
+      default: '',
       trim: true,
     },
     dailyStudyGoal: {
