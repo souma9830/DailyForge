@@ -3,23 +3,27 @@ import { X, BookOpen, Clock } from 'lucide-react';
 
 export default function LogStudyModal({ isOpen, onClose, onCreate }) {
   const [subject, setSubject] = useState('');
+  const [topic, setTopic] = useState('');
   const [durationMinutes, setDurationMinutes] = useState(60);
-  const [category, setCategory] = useState('Engineering');
+  const [difficulty, setDifficulty] = useState('Medium');
   const [notes, setNotes] = useState('');
 
   if (!isOpen) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!subject.trim()) return;
+    if (!subject.trim() || !topic.trim()) return;
     onCreate({
       subject,
+      topic,
       durationMinutes: Number(durationMinutes),
-      category,
+      difficulty,
       notes,
     });
     setSubject('');
+    setTopic('');
     setDurationMinutes(60);
+    setDifficulty('Medium');
     setNotes('');
     onClose();
   };
@@ -38,16 +42,29 @@ export default function LogStudyModal({ isOpen, onClose, onCreate }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-xs font-bold text-slate-300 block mb-1">Subject / Topic *</label>
-            <input
-              type="text"
-              required
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder="e.g. Distributed Systems & Consensus Algorithms"
-              className="w-full px-4 py-2.5 rounded-xl bg-[#0d121d] border border-[#1e2638] text-sm text-slate-200 focus:outline-none focus:border-cyan-500"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Subject *</label>
+              <input
+                type="text"
+                required
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="e.g. Computer Science"
+                className="w-full px-4 py-2.5 rounded-xl bg-[#0d121d] border border-[#1e2638] text-sm text-slate-200 focus:outline-none focus:border-cyan-500"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Topic *</label>
+              <input
+                type="text"
+                required
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                placeholder="e.g. Graph Algorithms"
+                className="w-full px-4 py-2.5 rounded-xl bg-[#0d121d] border border-[#1e2638] text-sm text-slate-200 focus:outline-none focus:border-cyan-500"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -64,18 +81,16 @@ export default function LogStudyModal({ isOpen, onClose, onCreate }) {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-300 block mb-1">Category</label>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Difficulty</label>
               <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                value={difficulty}
+                onChange={(e) => setDifficulty(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl bg-[#0d121d] border border-[#1e2638] text-sm text-slate-200 focus:outline-none focus:border-cyan-500"
               >
-                <option value="Engineering">Engineering</option>
-                <option value="CS Core">CS Core</option>
-                <option value="Frontend">Frontend</option>
-                <option value="Backend">Backend</option>
-                <option value="System Design">System Design</option>
-                <option value="General">General</option>
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+                <option value="Expert">Expert</option>
               </select>
             </div>
           </div>
