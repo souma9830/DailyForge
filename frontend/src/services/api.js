@@ -106,4 +106,13 @@ export const deleteReminder = async (id) => {
   return await api.delete(`/reminders/${id}`);
 };
 
+// Settings API
+export const fetchSettings = async () => {
+  return await api.get('/settings');
+};
+
+export const updateSettings = async (settingsData) => {
+  return await api.put('/settings', settingsData);
+};
+
 export default api;
