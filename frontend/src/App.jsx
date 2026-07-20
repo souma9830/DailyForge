@@ -8,6 +8,7 @@ import StudyLogger from './components/StudyLogger';
 import CalendarView from './components/CalendarView';
 import GoalsView from './components/GoalsView';
 import RemindersView from './components/RemindersView';
+import AchievementsView from './components/AchievementsView';
 import ReflectionJournal from './components/ReflectionJournal';
 import ProductivityAnalytics from './components/ProductivityAnalytics';
 import SettingsView from './components/SettingsView';
@@ -320,6 +321,15 @@ export default function App() {
               onToggleReminder={handleToggleReminder}
               onDeleteReminder={handleDeleteReminder}
               onOpenNewReminder={() => setIsReminderModalOpen(true)}
+            />
+          )}
+
+          {activeTab === 'achievements' && (
+            <AchievementsView
+              studySessions={studySessions}
+              habits={habits}
+              tasks={tasks}
+              goals={goals}
             />
           )}
 
