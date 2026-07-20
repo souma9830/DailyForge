@@ -21,11 +21,9 @@ import {
   PieChart, 
   Pie, 
   Cell, 
-  Legend,
-  AreaChart,
-  Area,
-  CartesianGrid 
+  Legend
 } from 'recharts';
+import StudyHeatmap from './StudyHeatmap';
 
 export default function ProductivityAnalytics({ stats, habits = [], tasks = [], studySessions = [] }) {
   const todayStr = new Date().toISOString().split('T')[0];
@@ -87,7 +85,7 @@ export default function ProductivityAnalytics({ stats, habits = [], tasks = [], 
     };
   });
 
-  // 6. Subject-Wise Pie Chart Dataset
+  // Subject-Wise Pie Chart Dataset
   const subjectMap = {};
   studySessions.forEach((s) => {
     const subj = s.subject || 'General Study';
@@ -118,7 +116,7 @@ export default function ProductivityAnalytics({ stats, habits = [], tasks = [], 
           </div>
           <h2 className="text-2xl font-black text-white">Productivity & Study Analytics</h2>
           <p className="text-xs text-slate-400 mt-1">
-            Visual graphs of daily focus hours, weekly/monthly trends, and subject distribution from MongoDB.
+            Visual graphs of daily focus hours, weekly/monthly trends, GitHub heatmap, and subject distribution from MongoDB.
           </p>
         </div>
 
@@ -168,9 +166,12 @@ export default function ProductivityAnalytics({ stats, habits = [], tasks = [], 
         </div>
       </div>
 
+      {/* GitHub Style Contribution Heatmap */}
+      <StudyHeatmap studySessions={studySessions} />
+
       {/* Main Visual Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 1. Daily Study Hours Trend Chart (Recharts BarChart) */}
+        {/* Daily Study Hours Trend Chart (Recharts BarChart) */}
         <div className="glass-panel p-6 rounded-3xl border border-[#1e2638] space-y-4">
           <div className="flex items-center justify-between border-b border-[#1e2638] pb-4">
             <div className="flex items-center gap-2">
@@ -183,20 +184,19 @@ export default function ProductivityAnalytics({ stats, habits = [], tasks = [], 
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dailyStudyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e2638" />
+                <Bar dataKey="studyHours" fill="#06b6d4" radius={[8, 8, 0, 0]} />
                 <XAxis dataKey="day" stroke="#64748b" tick={{ fontSize: 12 }} />
                 <YAxis stroke="#64748b" tick={{ fontSize: 12 }} />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#121723', borderColor: '#1e2638', borderRadius: '12px', color: '#fff' }}
                   labelStyle={{ color: '#06b6d4', fontWeight: 'bold' }}
                 />
-                <Bar dataKey="studyHours" fill="#06b6d4" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* 2. Subject-Wise Pie Chart (Recharts PieChart) */}
+        {/* Subject-Wise Pie Chart (Recharts PieChart) */}
         <div className="glass-panel p-6 rounded-3xl border border-[#1e2638] space-y-4">
           <div className="flex items-center justify-between border-b border-[#1e2638] pb-4">
             <div className="flex items-center gap-2">
