@@ -127,7 +127,9 @@ export default function App() {
 
   // ── Socket.io Setup ──────────────────────────────────────────────────────────
   useEffect(() => {
-    const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000');
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const socketUrl = apiUrl.endsWith('/api') ? apiUrl.slice(0, -4) : apiUrl;
+    const socket = io(socketUrl);
 
     socket.on('connect', () => {
       console.log('[Socket] Connected to backend');
