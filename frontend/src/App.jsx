@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard';
 import HabitTracker from './components/HabitTracker';
 import TaskBoard from './components/TaskBoard';
 import StudyLogger from './components/StudyLogger';
+import CalendarView from './components/CalendarView';
 import ReflectionJournal from './components/ReflectionJournal';
 import ProductivityAnalytics from './components/ProductivityAnalytics';
 import SettingsView from './components/SettingsView';
@@ -191,6 +192,14 @@ export default function App() {
               studySessions={studySessions}
               onCreateStudySession={handleCreateStudySession}
               onDeleteStudySession={handleDeleteStudySession}
+            />
+          )}
+
+          {activeTab === 'calendar' && (
+            <CalendarView
+              tasks={tasks}
+              studySessions={studySessions}
+              habits={habits}
             />
           )}
 
