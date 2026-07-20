@@ -98,4 +98,9 @@ export const fetchSettings = () => api.get('/settings');
 
 export const updateSettings = (data) => api.put('/settings', data);
 
+// ─── Events (Calendar) ───────────────────────────────────────────────────────
+export const fetchEvents = () => api.get('/events');
+export const createEvent = (data) => api.post('/events', data);
+export const deleteEvent = (id) => api.delete(`/events/${id}`);
+
 export default api;

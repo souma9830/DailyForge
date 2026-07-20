@@ -1,6 +1,8 @@
 const cron = require('node-cron');
 const axios = require('axios');
 const Reminder = require('../models/Reminder');
+const Event = require('../models/Event');
+const emailService = require('./emailService');
 
 let _io = null;
 
@@ -19,6 +21,7 @@ function emit(event, payload) {
 // ─── Main Scheduler (every minute) ───────────────────────────────────────────
 function startScheduler() {
   cron.schedule('* * * * *', checkReminders);
+  cron.schedule('* * * * *', checkEvents);
   cron.schedule('59 23 * * *', markAllMissed);   // midnight: mark missed
   cron.schedule('0 0 * * *', resetForNewDay);    // midnight+1: reset idle
 }
@@ -127,6 +130,40 @@ async function resetForNewDay() {
     }
   );
   console.log('[Scheduler] Reset reminders for new day.');
+}
+
+// ─── Events Email Scheduler ──────────────────────────────────────────────────
+async function checkEvents() {
+  try {
+    const now = new Date();
+    // Only fetch events that haven't triggered an email yet
+    const events = await Event.find({ isNotified: false });
+
+    for (const ev of events) {
+      const [h, m] = ev.time.split(':').map(Number);
+      const evDate = new Date(ev.date); // YYYY-MM-DD
+      evDate.setHours(h, m, 0, 0);
+
+      // Trigger time is notifyBeforeMinutes before the exact event time
+      const triggerTime = new Date(evDate.getTime() - (ev.notifyBeforeMinutes * 60000));
+
+      if (now >= triggerTime) {
+        // Time to send email
+        const subject = `Upcoming Event: ${ev.title}`;
+        const text = `Hi there,\n\nThis is an automated reminder for your upcoming event on DailyForge Calendar.\n\nEvent: ${ev.title}\nDate: ${ev.date}\nTime: ${ev.time}\nDescription: ${ev.description || 'No description provided.'}\n\nStay productive!\n- DailyForge`;
+
+        try {
+          await emailService.sendEmail({ to: ev.email, subject, text });
+          ev.isNotified = true;
+          await ev.save();
+        } catch (err) {
+          console.error(`[EventScheduler] Failed to send email for event ${ev._id}`);
+        }
+      }
+    }
+  } catch (err) {
+    console.error('[EventScheduler] Error checking events:', err.message);
+  }
 }
 
 // ─── ntfy Mobile Push ─────────────────────────────────────────────────────────

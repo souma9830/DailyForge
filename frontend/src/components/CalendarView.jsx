@@ -13,7 +13,7 @@ import {
   Info
 } from 'lucide-react';
 
-export default function CalendarView({ tasks = [], studySessions = [], habits = [] }) {
+export default function CalendarView({ tasks = [], studySessions = [], habits = [], events = [], onAddEvent, onDeleteEvent }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDateStr, setSelectedDateStr] = useState(
     new Date().toISOString().split('T')[0]
@@ -78,12 +78,16 @@ export default function CalendarView({ tasks = [], studySessions = [], habits = 
     // Completed habits on this date
     const dayHabits = habits.filter((h) => h.completedDates?.includes(dateStr));
 
+    // Events scheduled on this date
+    const dayEvents = events.filter((e) => e.date === dateStr);
+
     return {
       tasks: dayTasks,
       studySessions: dayStudy,
       studyMins,
       studyHours,
       habits: dayHabits,
+      events: dayEvents,
     };
   };
 
@@ -191,6 +195,11 @@ export default function CalendarView({ tasks = [], studySessions = [], habits = 
 
                   {/* Day Summary Micro Badges */}
                   <div className="space-y-1">
+                    {data.events.length > 0 && (
+                      <div className="text-[10px] font-bold text-purple-300 bg-purple-500/15 px-1.5 py-0.5 rounded-md truncate border border-purple-500/20">
+                        📅 {data.events.length} event(s)
+                      </div>
+                    )}
                     {Number(data.studyHours) > 0 && (
                       <div className="text-[10px] font-bold text-cyan-300 bg-cyan-500/15 px-1.5 py-0.5 rounded-md truncate border border-cyan-500/20">
                         📚 {data.studyHours}h study
@@ -217,18 +226,25 @@ export default function CalendarView({ tasks = [], studySessions = [], habits = 
           </div>
 
           {/* Quick Stats Cards for Selected Date */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div className="p-3.5 rounded-2xl bg-[#0d121d] border border-[#1e2638]">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Total Study Hours</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase">Study Hours</span>
               <div className="text-xl font-black text-cyan-400 mt-1 flex items-baseline gap-1">
                 {selectedData.studyHours} <span className="text-xs font-semibold text-slate-400">hrs</span>
               </div>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-[#0d121d] border border-[#1e2638]">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Tasks Completed</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase">Tasks Done</span>
               <div className="text-xl font-black text-emerald-400 mt-1 flex items-baseline gap-1">
                 {selectedData.tasks.length} <span className="text-xs font-semibold text-slate-400">tasks</span>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-[#0d121d] border border-[#1e2638]">
+              <span className="text-[10px] font-bold text-slate-400 uppercase">Events</span>
+              <div className="text-xl font-black text-purple-400 mt-1 flex items-baseline gap-1">
+                {selectedData.events.length} <span className="text-xs font-semibold text-slate-400">evts</span>
               </div>
             </div>
           </div>
@@ -314,19 +330,65 @@ export default function CalendarView({ tasks = [], studySessions = [], habits = 
               </div>
 
               {/* Modal Stats Row */}
-              <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="grid grid-cols-4 gap-3 text-center">
                 <div className="p-3 rounded-2xl bg-[#0d121d] border border-[#1e2638]">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Study Hours</span>
-                  <div className="text-lg font-black text-cyan-400 mt-1">{selectedData.studyHours} hrs</div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Study</span>
+                  <div className="text-lg font-black text-cyan-400 mt-1">{selectedData.studyHours}h</div>
                 </div>
                 <div className="p-3 rounded-2xl bg-[#0d121d] border border-[#1e2638]">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Tasks Done</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Tasks</span>
                   <div className="text-lg font-black text-emerald-400 mt-1">{selectedData.tasks.length}</div>
                 </div>
                 <div className="p-3 rounded-2xl bg-[#0d121d] border border-[#1e2638]">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Habits Met</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Habits</span>
                   <div className="text-lg font-black text-amber-400 mt-1">{selectedData.habits.length}</div>
                 </div>
+                <div className="p-3 rounded-2xl bg-[#0d121d] border border-[#1e2638]">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Events</span>
+                  <div className="text-lg font-black text-purple-400 mt-1">{selectedData.events.length}</div>
+                </div>
+              </div>
+
+              {/* Scheduled Events */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-slate-300 uppercase flex items-center gap-1.5">
+                    <CalendarIcon className="w-4 h-4 text-purple-400" /> Scheduled Events
+                  </h4>
+                  <button
+                    onClick={() => {
+                      setIsModalOpen(false);
+                      onAddEvent(selectedDateStr);
+                    }}
+                    className="text-[10px] font-bold bg-purple-600 hover:bg-purple-500 text-white px-2 py-1 rounded"
+                  >
+                    + Add Event
+                  </button>
+                </div>
+                
+                {selectedData.events.length === 0 ? (
+                  <p className="text-xs text-slate-500 italic p-3 rounded-xl bg-[#0d121d]">No events scheduled for this day.</p>
+                ) : (
+                  <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                    {selectedData.events.map((ev) => (
+                      <div key={ev._id} className="p-3 rounded-xl bg-[#0d121d] border border-purple-500/20 text-xs">
+                        <div className="flex items-center justify-between font-bold text-white">
+                          <span>{ev.title}</span>
+                          <span className="text-purple-300 font-bold">{ev.time}</span>
+                        </div>
+                        <p className="text-slate-300 mt-0.5">{ev.description}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                            <Info className="w-3 h-3" /> Reminder: {ev.notifyBeforeMinutes}m before
+                          </span>
+                          <button onClick={() => onDeleteEvent(ev._id)} className="text-red-400 hover:text-red-300 p-1">
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Study Topics */}

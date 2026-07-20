@@ -20,6 +20,7 @@ import NewTaskModal from './components/Modals/NewTaskModal';
 import LogStudyModal from './components/Modals/LogStudyModal';
 import NewGoalModal from './components/Modals/NewGoalModal';
 import NewReminderModal from './components/Modals/NewReminderModal';
+import NewEventModal from './components/Modals/NewEventModal';
 import ExportDataModal from './components/ExportDataModal';
 
 import { useToast } from './hooks/useToast';
@@ -31,6 +32,7 @@ import {
   fetchStudySessions, createStudySession, deleteStudySession,
   fetchGoals, createGoal, updateGoal, deleteGoal,
   fetchReminders, createReminder, toggleReminder, deleteReminder,
+  fetchEvents, createEvent, deleteEvent,
   fetchSettings, updateSettings,
 } from './services/api';
 
@@ -65,6 +67,7 @@ export default function App() {
   const [studySessions, setStudySessions] = useState([]);
   const [goals, setGoals] = useState([]);
   const [reminders, setReminders] = useState([]);
+  const [events, setEvents] = useState([]);
   const [settings, setSettings] = useState({ username: '', dailyStudyGoal: 6, notificationTime: '20:00', theme: 'dark' });
   const [loading, setLoading] = useState(true);
 
@@ -76,6 +79,8 @@ export default function App() {
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const [selectedEventDate, setSelectedEventDate] = useState('');
 
   const isMongoConnected = stats?.isMongoDBConnected === true;
 
@@ -83,7 +88,7 @@ export default function App() {
   const loadAllData = useCallback(async () => {
     setLoading(true);
     try {
-      const [statsRes, habitsRes, tasksRes, studyRes, goalsRes, remRes, settingsRes] =
+      const [statsRes, habitsRes, tasksRes, studyRes, goalsRes, remRes, evRes, settingsRes] =
         await Promise.allSettled([
           fetchStats(),
           fetchHabits(),
@@ -91,6 +96,7 @@ export default function App() {
           fetchStudySessions(),
           fetchGoals(),
           fetchReminders(),
+          fetchEvents(),
           fetchSettings(),
         ]);
 
@@ -103,6 +109,7 @@ export default function App() {
         const rems = remRes.value.data?.data ?? [];
         setReminders(rems);
       }
+      if (evRes.status === 'fulfilled') setEvents(evRes.value.data?.data ?? []);
       if (settingsRes.status === 'fulfilled') {
         const s = settingsRes.value.data?.data;
         if (s) setSettings(s);
@@ -136,15 +143,14 @@ export default function App() {
     });
 
     socket.on('reminder:notify', (payload) => {
-      // payload: { reminderId, title, body, subject, topic, delayMinutes, type }
       showNotificationSW({
         title: payload.title,
         body: payload.body,
-        tag: `rem-${payload.reminderId}`, // Groups notifications for the same reminder
+        tag: `rem-${payload.reminderId}`,
         data: payload
       });
       addToast(`🔔 ${payload.title} — ${payload.body}`, 'warning');
-      loadAllData(); // Refresh list to show updated status
+      loadAllData();
     });
 
     socket.on('reminder:missed', () => loadAllData());
@@ -187,6 +193,10 @@ export default function App() {
   const handleCreateReminder = withReload((d) => createReminder(d), 'Reminder saved ✅');
   const handleToggleReminder = withReload((id) => toggleReminder(id));
   const handleDeleteReminder = withReload((id) => deleteReminder(id), 'Reminder deleted');
+
+  // ── Event Handlers ────────────────────────────────────────────────────────────
+  const handleCreateEvent    = withReload((d) => createEvent(d), 'Event scheduled & Email set ✅');
+  const handleDeleteEvent    = withReload((id) => deleteEvent(id), 'Event deleted');
 
   return (
     <div className="flex min-h-screen bg-[#0a0d14] text-slate-100 font-sans selection:bg-blue-600 selection:text-white">
@@ -271,7 +281,17 @@ export default function App() {
                 />
               )}
               {activeTab === 'calendar' && (
-                <CalendarView tasks={tasks} studySessions={studySessions} habits={habits} />
+                <CalendarView 
+                  tasks={tasks} 
+                  studySessions={studySessions} 
+                  habits={habits}
+                  events={events}
+                  onAddEvent={(date) => {
+                    setSelectedEventDate(date);
+                    setIsEventModalOpen(true);
+                  }}
+                  onDeleteEvent={handleDeleteEvent}
+                />
               )}
               {activeTab === 'goals' && (
                 <GoalsView
@@ -327,6 +347,7 @@ export default function App() {
       <LogStudyModal isOpen={isStudyModalOpen} onClose={() => setIsStudyModalOpen(false)} onCreate={handleCreateStudy} />
       <NewGoalModal isOpen={isGoalModalOpen} onClose={() => setIsGoalModalOpen(false)} onCreate={handleCreateGoal} />
       <NewReminderModal isOpen={isReminderModalOpen} onClose={() => setIsReminderModalOpen(false)} onCreate={handleCreateReminder} />
+      <NewEventModal isOpen={isEventModalOpen} onClose={() => setIsEventModalOpen(false)} onCreate={handleCreateEvent} initialDate={selectedEventDate} />
       <ExportDataModal isOpen={isExportModalOpen} onClose={() => setIsExportModalOpen(false)} studySessions={studySessions} tasks={tasks} habits={habits} />
 
       <ToastContainer toasts={toasts} onRemove={removeToast} />
